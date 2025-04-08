@@ -1,0 +1,19 @@
+{
+    "build": {
+      "env": {
+        "CI": "true",
+        "NEXT_TELEMETRY_DISABLED": "1"
+      }
+    },
+    "rewrites": [
+      {
+        "source": "/playback/:id",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/remix/:id",
+        "destination": "/index.html"
+      }
+    ]
+  }
+  

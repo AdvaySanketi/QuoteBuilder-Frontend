@@ -1,0 +1,17 @@
+# Ignore the node_modules directory
+node_modules/
+
+# Ignore the README.md file
+README.md
+
+# Ignore the build directory
+build/
+
+# Ignore all files and directories in the root directory
+/*
+
+# Include the src directory (negate the previous pattern)
+!src/
+
+# Ignore the .eslintrc.cjs file
+.eslintrc.cjs

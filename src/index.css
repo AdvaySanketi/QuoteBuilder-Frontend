@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    ::-webkit-scrollbar {
+        width: 0px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #ffffff;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+    }
+}
+
+.dark {
+    background-color: black;
+    color: #fff;
+}
+
+@font-face {
+    font-family: 'Inconsolata';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/assets/fonts/inconsolata/static/Inconsolata-Regular.ttf')
+        format('truetype');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/assets/fonts/inter/static/Inter-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Lora';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/assets/fonts/lora/static/Lora-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Monospace';
+    font-style: normal;
+    font-weight: 400;
+    src: url('/assets/fonts/monospace/static/Monospace-Regular.ttf')
+        format('truetype');
+}
+
+.sans {
+    font-family: 'Inconsolata', sans-serif;
+}
+
+.serif {
+    font-family: 'Lora', serif;
+}
+
+.monospace {
+    font-family: 'Monospace', monospace;
+}
