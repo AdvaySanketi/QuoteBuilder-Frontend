@@ -80,13 +80,13 @@ export const QuoteProvider: React.FC<QuoteProviderProps> = ({ children }) => {
     const addQuote = async (quoteData: QuoteFormData): Promise<string> => {
         try {
             const now = new Date().toISOString();
+            const qid = Math.floor(Math.random() * 10000); // could use uuidv4() also
             const newQuote: Quote = {
                 ...quoteData,
-                id: `Q-${Date.now()}`,
-                quoteNumber: `QN-${Date.now()}`,
+                id: `Q-${qid}`,
+                quoteNumber: `${qid}`,
                 createdAt: now,
                 updatedAt: now,
-                status: 'DRAFT',
                 parts: quoteData.parts || [],
             };
 

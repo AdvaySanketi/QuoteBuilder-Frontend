@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { KJUR, hextob64 } from 'jsrsasign';
+import { KJUR } from 'jsrsasign';
 import { QuoteStatus, QuotePart } from '../models/types';
 
 const BASE_URL =
