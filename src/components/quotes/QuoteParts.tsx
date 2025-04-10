@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { QuotePart } from '../../models/types';
 import Button from '../ui/Button';
 
@@ -6,13 +6,81 @@ interface QuotePartsProps {
     parts: QuotePart[];
     currency: 'INR' | 'USD';
     onDeletePart: (id: string) => void;
+    disabled: boolean;
+}
+
+interface ConversionResponse {
+    result: string;
+    base_code: string;
+    target_code: string;
+    conversion_rate: number;
+    conversion_result: number;
 }
 
 const QuoteParts: React.FC<QuotePartsProps> = ({
     parts,
     currency,
     onDeletePart,
+    disabled,
 }) => {
+    const [conversionRate, setConversionRate] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [convertedParts, setConvertedParts] = useState<QuotePart[]>(parts);
+
+    const exchangeRateApiUrl = import.meta.env.VITE_EXCHANGE_RATE_API_URL;
+
+    useEffect(() => {
+        const fetchConversionRate = async () => {
+            if (currency !== 'INR') {
+                setIsLoading(true);
+                setError(null);
+
+                try {
+                    const response = await fetch(`${exchangeRateApiUrl}/1`);
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch conversion rate');
+                    }
+
+                    const data: ConversionResponse = await response.json();
+
+                    if (data.result === 'success') {
+                        setConversionRate(data.conversion_rate);
+                    } else {
+                        throw new Error('API returned unsuccessful result');
+                    }
+                } catch (err) {
+                    console.error('Error fetching conversion rate:', err);
+                    setError('Could not load currency conversion rates');
+                    setConversionRate(0.012); // fallback
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                setConversionRate(null);
+            }
+        };
+
+        fetchConversionRate();
+    }, [currency, exchangeRateApiUrl]);
+
+    useEffect(() => {
+        if (currency === 'USD' && conversionRate) {
+            const converted = parts.map((part) => ({
+                ...part,
+                priceQuantities: part.priceQuantities.map((pq) => ({
+                    ...pq,
+                    originalPrice: pq.price,
+                    price: Number((pq.price * conversionRate).toFixed(2)),
+                })),
+            }));
+            setConvertedParts(converted);
+        } else {
+            setConvertedParts(parts);
+        }
+    }, [parts, currency, conversionRate]);
+
     if (parts.length === 0) {
         return (
             <div className='flex flex-col items-center justify-center px-4 py-12 text-center'>
@@ -58,6 +126,75 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
 
     return (
         <div className='overflow-x-auto'>
+            {isLoading && (
+                <div className='mb-4 rounded-md bg-blue-50 p-2 text-sm text-blue-700'>
+                    <div className='flex items-center'>
+                        <svg
+                            className='mr-2 h-4 w-4 animate-spin text-blue-600'
+                            xmlns='http://www.w3.org/2000/svg'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                        >
+                            <circle
+                                className='opacity-25'
+                                cx='12'
+                                cy='12'
+                                r='10'
+                                stroke='currentColor'
+                                strokeWidth='4'
+                            ></circle>
+                            <path
+                                className='opacity-75'
+                                fill='currentColor'
+                                d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                            ></path>
+                        </svg>
+                        Loading currency conversion rates...
+                    </div>
+                </div>
+            )}
+
+            {error && (
+                <div className='mb-4 rounded-md bg-yellow-50 p-2 text-sm text-yellow-800'>
+                    <div className='flex items-center'>
+                        <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            className='mr-2 h-4 w-4 text-yellow-600'
+                            viewBox='0 0 20 20'
+                            fill='currentColor'
+                        >
+                            <path
+                                fillRule='evenodd'
+                                d='M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
+                                clipRule='evenodd'
+                            />
+                        </svg>
+                        {error} - Using estimated conversion rates.
+                    </div>
+                </div>
+            )}
+
+            {currency === 'USD' && conversionRate && (
+                <div className='mb-4 rounded-md bg-green-50 p-3 text-sm text-green-800'>
+                    <div className='flex items-center'>
+                        <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            className='mr-2 h-5 w-5 text-green-600'
+                            viewBox='0 0 20 20'
+                            fill='currentColor'
+                        >
+                            <path
+                                fillRule='evenodd'
+                                d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+                                clipRule='evenodd'
+                            />
+                        </svg>
+                        Showing prices in USD (1 INR ={' '}
+                        {conversionRate.toFixed(5)} USD)
+                    </div>
+                </div>
+            )}
+
             <table className='min-w-full divide-y divide-gray-200'>
                 <thead>
                     <tr className='bg-gray-50'>
@@ -98,9 +235,9 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                     </tr>
                 </thead>
                 <tbody className='divide-y divide-gray-200 bg-white'>
-                    {parts.map((part, partIndex) => (
+                    {convertedParts.map((part, partIndex) => (
                         <tr
-                            key={part.id}
+                            key={part.partName}
                             className={
                                 partIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                             }
@@ -130,7 +267,7 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                                 );
                                 return (
                                     <td
-                                        key={`${part.id}-${qty}`}
+                                        key={`${part.partName}-${qty}`}
                                         className='whitespace-nowrap px-6 py-4 text-center text-sm'
                                     >
                                         {priceObj ? (
@@ -148,10 +285,11 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                             })}
                             <td className='whitespace-nowrap px-6 py-4 text-right text-sm font-medium'>
                                 <Button
-                                    onClick={() => onDeletePart(part.id)}
+                                    onClick={() => onDeletePart(part.partName)}
                                     variant='danger'
                                     size='sm'
                                     className='flex items-center'
+                                    disabled={disabled}
                                 >
                                     <svg
                                         xmlns='http://www.w3.org/2000/svg'
