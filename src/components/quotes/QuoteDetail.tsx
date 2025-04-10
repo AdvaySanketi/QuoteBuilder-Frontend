@@ -13,11 +13,18 @@ import { isDateInFuture } from '../../utils/helpers';
 
 const QuoteDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { getQuoteById, addQuote, updateQuote } = useQuoteContext();
+    const {
+        getQuoteById,
+        addQuote,
+        updateQuote,
+        updateQuoteStatus,
+        deleteQuote,
+    } = useQuoteContext();
     const navigate = useNavigate();
     const isNewQuote = id === 'new';
 
     const [formData, setFormData] = useState<QuoteFormData>({
+        _id: '',
         clientName: '',
         currency: 'INR',
         validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -32,21 +39,26 @@ const QuoteDetail: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        if (!isNewQuote && id) {
-            const quote = getQuoteById(id);
-            if (quote) {
-                setFormData({
-                    clientName: quote.clientName,
-                    currency: quote.currency,
-                    validUntil: quote.validUntil.split('T')[0],
-                    status: quote.status,
-                    parts: quote.parts,
-                });
-                setStatus(quote.status);
-            } else {
-                navigate('/');
+        const fetchQuote = async () => {
+            if (!isNewQuote && id) {
+                const quote = await getQuoteById(id);
+                if (quote) {
+                    setFormData({
+                        _id: quote._id || '',
+                        clientName: quote.clientName,
+                        currency: quote.currency,
+                        validUntil: quote.validUntil.split('T')[0],
+                        status: quote.status,
+                        parts: quote.parts,
+                    });
+                    setStatus(quote.status);
+                } else {
+                    navigate('/');
+                }
             }
-        }
+        };
+
+        fetchQuote();
     }, [id, getQuoteById, isNewQuote, navigate]);
 
     const handleInputChange = (
@@ -56,22 +68,26 @@ const QuoteDetail: React.FC = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setIsSaving(true);
 
         if (isNewQuote) {
-            const newId = addQuote(formData);
+            const newId = await addQuote(formData);
             setIsSaving(false);
             navigate(`/quote/${newId}`);
         } else if (id) {
-            updateQuote(id, formData);
+            await updateQuote(formData._id, formData);
             setIsSaving(false);
         }
     };
 
+    const handleDelete = async () => {
+        await deleteQuote(formData._id);
+    };
+
     const handleDownloadPDF = async () => {
         if (!isNewQuote && id) {
-            const quote = getQuoteById(id);
+            const quote = await getQuoteById(id);
             if (quote) {
                 try {
                     await generatePDF(quote);
@@ -83,8 +99,10 @@ const QuoteDetail: React.FC = () => {
         }
     };
 
-    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newStatus = e.target.value as QuoteStatus;
+    const handleStatusChange = async (
+        newStatus: QuoteStatus = formData.status
+    ) => {
+        await updateQuoteStatus(formData._id, newStatus);
         setStatus(newStatus);
         setFormData((prev) => ({ ...prev, status: newStatus }));
     };
@@ -92,7 +110,7 @@ const QuoteDetail: React.FC = () => {
     const statusOptions = [
         { value: 'DRAFT', label: 'Draft' },
         { value: 'SENT', label: 'Sent' },
-        { value: 'ACCEPTED', label: 'Accepted' },
+        { value: 'APPROVED', label: 'Approved' },
         { value: 'REJECTED', label: 'Rejected' },
         { value: 'EXPIRED', label: 'Expired' },
     ];
@@ -108,7 +126,7 @@ const QuoteDetail: React.FC = () => {
                 return 'bg-yellow-100 text-yellow-800';
             case 'SENT':
                 return 'bg-blue-100 text-blue-800';
-            case 'ACCEPTED':
+            case 'APPROVED':
                 return 'bg-green-100 text-green-800';
             case 'REJECTED':
                 return 'bg-red-100 text-red-800';
@@ -189,8 +207,8 @@ const QuoteDetail: React.FC = () => {
                         </Button>
                         <Button
                             onClick={handleSave}
-                            className='flex items-center bg-indigo-600 shadow-sm transition-colors hover:bg-indigo-700'
-                            disabled={isSaving}
+                            className='flex items-center bg-indigo-600 shadow-sm transition-colors hover:bg-indigo-700 disabled:bg-gray-400'
+                            disabled={isSaving || status !== 'DRAFT'}
                         >
                             {isSaving ? (
                                 <>
@@ -268,6 +286,7 @@ const QuoteDetail: React.FC = () => {
                                     placeholder='Enter client name'
                                     fullWidth
                                     className='focus:border-indigo-500 focus:ring-indigo-500'
+                                    disabled={status !== 'DRAFT'}
                                 />
                                 <Dropdown
                                     label='Currency'
@@ -288,15 +307,21 @@ const QuoteDetail: React.FC = () => {
                                     onChange={handleInputChange}
                                     fullWidth
                                     className='focus:border-indigo-500 focus:ring-indigo-500'
+                                    disabled={status !== 'DRAFT'}
                                 />
                                 {!isNewQuote && (
                                     <Dropdown
                                         label='Status'
                                         value={status}
-                                        onChange={handleStatusChange}
+                                        onChange={(e) => {
+                                            handleStatusChange(
+                                                e.target.value as QuoteStatus
+                                            );
+                                        }}
                                         options={statusOptions}
                                         fullWidth
                                         className='focus:border-indigo-500 focus:ring-indigo-500'
+                                        disabled={status !== 'DRAFT'}
                                     />
                                 )}
                             </div>
@@ -321,7 +346,8 @@ const QuoteDetail: React.FC = () => {
                                     variant='outline'
                                     size='sm'
                                     onClick={() => setIsAddingPart(true)}
-                                    className='flex items-center border-indigo-200 text-indigo-600 hover:bg-indigo-50'
+                                    className='flex items-center border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:bg-gray-100 disabled:text-gray-400'
+                                    disabled={status !== 'DRAFT'}
                                 >
                                     <svg
                                         xmlns='http://www.w3.org/2000/svg'
@@ -362,11 +388,14 @@ const QuoteDetail: React.FC = () => {
                                     <QuoteParts
                                         parts={formData.parts}
                                         currency={formData.currency}
-                                        onDeletePart={(id) => {
+                                        disabled={status !== 'DRAFT'}
+                                        onDeletePart={(name) => {
+                                            if (status !== 'DRAFT') return;
                                             setFormData((prev) => ({
                                                 ...prev,
                                                 parts: prev.parts.filter(
-                                                    (part) => part.id !== id
+                                                    (part) =>
+                                                        part.partName !== name
                                                 ),
                                             }));
                                         }}
@@ -423,7 +452,8 @@ const QuoteDetail: React.FC = () => {
 
                                 <Button
                                     onClick={handleSave}
-                                    className='flex w-full items-center justify-center bg-indigo-600 transition-colors hover:bg-indigo-700'
+                                    className='flex w-full items-center justify-center bg-indigo-600 transition-colors hover:bg-indigo-700 disabled:bg-gray-400'
+                                    disabled={status !== 'DRAFT'}
                                 >
                                     <svg
                                         xmlns='http://www.w3.org/2000/svg'
@@ -441,6 +471,27 @@ const QuoteDetail: React.FC = () => {
                                 </Button>
 
                                 {!isNewQuote && (
+                                    <Button
+                                        className='flex w-full items-center justify-center bg-red-600 transition-colors hover:bg-red-700'
+                                        onClick={handleDelete}
+                                    >
+                                        <svg
+                                            xmlns='http://www.w3.org/2000/svg'
+                                            className='mr-1 h-4 w-4'
+                                            viewBox='0 0 20 20'
+                                            fill='currentColor'
+                                        >
+                                            <path
+                                                fillRule='evenodd'
+                                                d='M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z'
+                                                clipRule='evenodd'
+                                            />
+                                        </svg>
+                                        Delete Quote
+                                    </Button>
+                                )}
+
+                                {!isNewQuote && (
                                     <div className='mt-6 border-t border-gray-200 pt-6'>
                                         <h3 className='mb-3 text-sm font-medium text-gray-500'>
                                             Quick Actions
@@ -451,11 +502,9 @@ const QuoteDetail: React.FC = () => {
                                                 <button
                                                     className='flex w-full items-center rounded-md px-4 py-2 text-left text-sm text-blue-700 transition-colors hover:bg-blue-50'
                                                     onClick={() => {
-                                                        setStatus('SENT');
-                                                        setFormData((prev) => ({
-                                                            ...prev,
-                                                            status: 'SENT',
-                                                        }));
+                                                        handleStatusChange(
+                                                            'SENT'
+                                                        );
                                                     }}
                                                 >
                                                     <svg
@@ -475,14 +524,8 @@ const QuoteDetail: React.FC = () => {
                                                     <button
                                                         className='flex w-full items-center rounded-md px-4 py-2 text-left text-sm text-green-700 transition-colors hover:bg-green-50'
                                                         onClick={() => {
-                                                            setStatus(
-                                                                'ACCEPTED'
-                                                            );
-                                                            setFormData(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    status: 'ACCEPTED',
-                                                                })
+                                                            handleStatusChange(
+                                                                'APPROVED'
                                                             );
                                                         }}
                                                     >
@@ -498,20 +541,14 @@ const QuoteDetail: React.FC = () => {
                                                                 clipRule='evenodd'
                                                             />
                                                         </svg>
-                                                        Mark as Accepted
+                                                        Mark as Approved
                                                     </button>
 
                                                     <button
                                                         className='flex w-full items-center rounded-md px-4 py-2 text-left text-sm text-red-700 transition-colors hover:bg-red-50'
                                                         onClick={() => {
-                                                            setStatus(
+                                                            handleStatusChange(
                                                                 'REJECTED'
-                                                            );
-                                                            setFormData(
-                                                                (prev) => ({
-                                                                    ...prev,
-                                                                    status: 'REJECTED',
-                                                                })
                                                             );
                                                         }}
                                                     >
@@ -528,6 +565,29 @@ const QuoteDetail: React.FC = () => {
                                                             />
                                                         </svg>
                                                         Mark as Rejected
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {status === 'REJECTED' && (
+                                                <>
+                                                    <button
+                                                        className='flex w-full items-center rounded-md px-4 py-2 text-left text-sm text-yellow-800 transition-colors hover:bg-yellow-50'
+                                                        onClick={() => {
+                                                            handleStatusChange(
+                                                                'DRAFT'
+                                                            );
+                                                        }}
+                                                    >
+                                                        <svg
+                                                            xmlns='http://www.w3.org/2000/svg'
+                                                            className='mr-2 h-4 w-4 text-yellow-600'
+                                                            viewBox='0 0 20 20'
+                                                            fill='currentColor'
+                                                        >
+                                                            <path d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' />
+                                                        </svg>
+                                                        Revert to Draft
                                                     </button>
                                                 </>
                                             )}

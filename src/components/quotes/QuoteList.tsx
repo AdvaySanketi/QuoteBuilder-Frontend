@@ -100,7 +100,7 @@ const QuoteList: React.FC = () => {
 
                     <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
                         {quotes.map((quote) => (
-                            <QuoteCard key={quote.id} quote={quote} />
+                            <QuoteCard key={quote._id} quote={quote} />
                         ))}
                     </div>
                 </>

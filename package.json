@@ -13,6 +13,9 @@
     "axios": "^1.3.6",
     "firebase": "^11.4.0",
     "immutability-helper": "^3.1.1",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
+    "jsrsasign": "^11.1.0",
     "lucide-react": "^0.403.0",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
@@ -24,11 +27,10 @@
     "react-router-dom": "^7.2.0",
     "react-spinners": "^0.15.0",
     "sonner": "^2.0.1",
-    "uuid": "^11.1.0",
-    "jspdf": "^3.0.1",
-    "jspdf-autotable": "^5.0.2"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/jsrsasign": "^10.5.15",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@types/youtube": "^0.1.0",

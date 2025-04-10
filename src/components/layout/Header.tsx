@@ -91,7 +91,7 @@ const Header: React.FC = () => {
                                     </span>
                                     <div className='flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100'>
                                         <span className='font-medium text-indigo-800'>
-                                            JD
+                                            AS
                                         </span>
                                     </div>
                                 </button>

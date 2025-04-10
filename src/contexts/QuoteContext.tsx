@@ -1,202 +1,17 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { Quote, QuoteFormData } from '../models/types';
-// import { v4 as uuidv4 } from 'uuid';
-
-// const initialQuotes: Quote[] = [
-//     {
-//         id: '1',
-//         clientName: 'ElectroMakes',
-//         quoteNumber: 'QM-2024-001',
-//         currency: 'INR',
-//         validUntil: '2025-05-20',
-//         status: 'ACCEPTED',
-//         parts: [
-//             {
-//                 id: '1-1',
-//                 partName: 'DI280101',
-//                 moq: 100,
-//                 priceQuantities: [
-//                     { quantity: 100, price: 125 },
-//                     { quantity: 250, price: 110 },
-//                     { quantity: 500, price: 95 },
-//                 ],
-//             },
-//             {
-//                 id: '1-2',
-//                 partName: 'KA090400',
-//                 moq: 200,
-//                 priceQuantities: [
-//                     { quantity: 250, price: 240 },
-//                     { quantity: 500, price: 220 },
-//                 ],
-//             },
-//         ],
-//         createdAt: '2024-06-15T00:00:00Z',
-//         updatedAt: '2024-06-20T00:00:00Z',
-//     },
-//     {
-//         id: '2',
-//         clientName: 'GlobalTech Solutions',
-//         quoteNumber: 'GT-2024-042',
-//         currency: 'USD',
-//         validUntil: '2024-12-31',
-//         status: 'REJECTED',
-//         parts: [
-//             {
-//                 id: '2-1',
-//                 partName: 'AN191119',
-//                 moq: 300,
-//                 priceQuantities: [
-//                     { quantity: 300, price: 310 },
-//                     { quantity: 600, price: 290 },
-//                 ],
-//             },
-//             {
-//                 id: '2-2',
-//                 partName: 'XT5500',
-//                 moq: 50,
-//                 priceQuantities: [
-//                     { quantity: 50, price: 75 },
-//                     { quantity: 100, price: 65 },
-//                 ],
-//             },
-//         ],
-//         createdAt: '2024-07-10T00:00:00Z',
-//         updatedAt: '2024-07-15T00:00:00Z',
-//     },
-//     {
-//         id: '3',
-//         clientName: 'Precision Components Ltd',
-//         quoteNumber: 'PC-2024-015',
-//         currency: 'INR',
-//         validUntil: '2025-03-15',
-//         status: 'DRAFT',
-//         parts: [
-//             {
-//                 id: '3-1',
-//                 partName: 'MC8800',
-//                 moq: 150,
-//                 priceQuantities: [
-//                     { quantity: 150, price: 180 },
-//                     { quantity: 300, price: 160 },
-//                 ],
-//             },
-//         ],
-//         createdAt: '2024-08-05T00:00:00Z',
-//         updatedAt: '2024-08-05T00:00:00Z',
-//     },
-//     {
-//         id: '4',
-//         clientName: 'Industrial Systems Inc',
-//         quoteNumber: 'IS-2023-112',
-//         currency: 'INR',
-//         validUntil: '2024-01-30',
-//         status: 'EXPIRED',
-//         parts: [
-//             {
-//                 id: '4-1',
-//                 partName: 'HV3200',
-//                 moq: 75,
-//                 priceQuantities: [
-//                     { quantity: 75, price: 420 },
-//                     { quantity: 150, price: 390 },
-//                 ],
-//             },
-//             {
-//                 id: '4-2',
-//                 partName: 'LP4555',
-//                 moq: 200,
-//                 priceQuantities: [{ quantity: 200, price: 150 }],
-//             },
-//         ],
-//         createdAt: '2023-12-01T00:00:00Z',
-//         updatedAt: '2024-01-31T00:00:00Z',
-//     },
-//     {
-//         id: '5',
-//         clientName: 'Automation Partners',
-//         quoteNumber: 'AP-2024-033',
-//         currency: 'USD',
-//         validUntil: '2025-02-28',
-//         status: 'SENT',
-//         parts: [
-//             {
-//                 id: '5-1',
-//                 partName: 'QC9900',
-//                 moq: 120,
-//                 priceQuantities: [
-//                     { quantity: 120, price: 85 },
-//                     { quantity: 240, price: 75 },
-//                 ],
-//             },
-//             {
-//                 id: '5-2',
-//                 partName: 'RT7700',
-//                 moq: 80,
-//                 priceQuantities: [{ quantity: 80, price: 110 }],
-//             },
-//             {
-//                 id: '5-3',
-//                 partName: 'SP2200',
-//                 moq: 300,
-//                 priceQuantities: [{ quantity: 300, price: 65 }],
-//             },
-//         ],
-//         createdAt: '2024-09-01T00:00:00Z',
-//         updatedAt: '2024-09-03T00:00:00Z',
-//     },
-//     {
-//         id: '6',
-//         clientName: 'Future Electronics',
-//         quoteNumber: 'FE-2024-056',
-//         currency: 'USD',
-//         validUntil: '2025-04-15',
-//         status: 'DRAFT',
-//         parts: [
-//             {
-//                 id: '6-1',
-//                 partName: 'ZP1001',
-//                 moq: 500,
-//                 priceQuantities: [
-//                     { quantity: 500, price: 45 },
-//                     { quantity: 1000, price: 40 },
-//                 ],
-//             },
-//         ],
-//         createdAt: '2024-10-10T00:00:00Z',
-//         updatedAt: '2024-10-12T00:00:00Z',
-//     },
-//     {
-//         id: '7',
-//         clientName: 'ElectroMakes',
-//         quoteNumber: 'QM-2024-078',
-//         currency: 'INR',
-//         validUntil: '2025-06-30',
-//         status: 'SENT',
-//         parts: [
-//             {
-//                 id: '7-1',
-//                 partName: 'DI280101',
-//                 moq: 100,
-//                 priceQuantities: [
-//                     { quantity: 100, price: 120 },
-//                     { quantity: 250, price: 105 },
-//                 ],
-//             },
-//         ],
-//         createdAt: '2024-11-15T00:00:00Z',
-//         updatedAt: '2024-11-18T00:00:00Z',
-//     },
-// ];
-
-const initialQuotes: Quote[] = [];
+import { Quote, QuoteFormData, QuoteStatus } from '../models/types';
+import { QuotationApi } from '../services/apiHelper';
 
 interface QuoteContextType {
     quotes: Quote[];
-    getQuoteById: (id: string) => Quote | undefined;
-    addQuote: (quote: QuoteFormData) => string;
-    updateQuote: (id: string, quote: QuoteFormData) => void;
-    deleteQuote: (id: string) => void;
+    loading: boolean;
+    error: string | null;
+    getQuoteById: (id: string) => Promise<Quote | undefined>;
+    addQuote: (quote: QuoteFormData) => Promise<string>;
+    updateQuote: (id: string, quote: QuoteFormData) => Promise<void>;
+    updateQuoteStatus: (id: string, quote: QuoteStatus) => Promise<void>;
+    deleteQuote: (id: string) => Promise<void>;
+    refreshQuotes: () => Promise<void>;
 }
 
 export const QuoteContext = createContext<QuoteContextType | undefined>(
@@ -208,70 +23,139 @@ interface QuoteProviderProps {
 }
 
 export const QuoteProvider: React.FC<QuoteProviderProps> = ({ children }) => {
-    const [quotes, setQuotes] = useState<Quote[]>(initialQuotes);
+    const [quotes, setQuotes] = useState<Quote[]>([]);
+    const [idMapping, setIdMapping] = useState<Record<string, string>>({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchQuotes = async () => {
+        try {
+            setLoading(true);
+            const response = await QuotationApi.getAllQuotations();
+            const quotesData = Array.isArray(response)
+                ? response
+                : response.data;
+
+            const newMapping = quotesData.reduce(
+                (acc: Record<string, string>, quote: Quote) => {
+                    if (quote.id && quote._id) {
+                        acc[quote.id] = quote._id;
+                    }
+                    return acc;
+                },
+                {} as Record<string, string>
+            );
+
+            setQuotes(quotesData);
+            setIdMapping(newMapping);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching quotations:', err);
+            setError('Failed to load quotes. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        console.log('Loading quotes from localStorage');
-        const storedQuotes = localStorage.getItem('quotes');
-        if (storedQuotes) {
-            try {
-                setQuotes(JSON.parse(storedQuotes));
-                console.log('Loaded quotes from localStorage');
-            } catch (e) {
-                console.error('Error parsing stored quotes:', e);
-            }
-        } else {
-            console.log('No stored quotes found, using initial data');
-        }
+        fetchQuotes();
     }, []);
 
-    useEffect(() => {
-        console.log('Saving quotes to localStorage:', quotes);
-        localStorage.setItem('quotes', JSON.stringify(quotes));
-    }, [quotes]);
-
-    const getQuoteById = (id: string) => {
-        return quotes.find((quote) => quote.id === id);
+    const refreshQuotes = async () => {
+        await fetchQuotes();
     };
 
-    const addQuote = (quoteData: QuoteFormData): string => {
-        const now = new Date().toISOString();
-        const qid = Math.floor(Math.random() * 10000); // could use uuidv4() also
-        const newQuote: Quote = {
-            id: `Q-${qid}`,
-            quoteNumber: `${qid}`,
-            createdAt: now,
-            updatedAt: now,
-            ...quoteData,
-        };
-
-        setQuotes((prevQuotes) => [...prevQuotes, newQuote]);
-        return newQuote.id;
+    const getQuoteById = async (id: string) => {
+        try {
+            const qid = idMapping[id] || id;
+            const response = await QuotationApi.getQuotationById(qid);
+            return response.data || response;
+        } catch (err) {
+            console.error('Error fetching quote:', err);
+            setError('Failed to fetch quote details.');
+            return undefined;
+        }
     };
 
-    const updateQuote = (id: string, quoteData: QuoteFormData) => {
-        setQuotes((prevQuotes) =>
-            prevQuotes.map((quote) =>
-                quote.id === id
-                    ? {
-                          ...quote,
-                          ...quoteData,
-                          updatedAt: new Date().toISOString(),
-                      }
-                    : quote
-            )
-        );
+    const addQuote = async (quoteData: QuoteFormData): Promise<string> => {
+        try {
+            const now = new Date().toISOString();
+            const newQuote: Quote = {
+                ...quoteData,
+                id: `Q-${Date.now()}`,
+                quoteNumber: `QN-${Date.now()}`,
+                createdAt: now,
+                updatedAt: now,
+                status: 'DRAFT',
+                parts: quoteData.parts || [],
+            };
+
+            const createdQuote = await QuotationApi.createQuotation(newQuote);
+
+            await refreshQuotes();
+
+            return createdQuote.id;
+        } catch (err) {
+            console.error('Error adding quote:', err);
+            setError('Failed to create quote.');
+            throw err;
+        }
     };
 
-    const deleteQuote = (id: string) => {
-        setQuotes((prevQuotes) =>
-            prevQuotes.filter((quote) => quote.id !== id)
-        );
+    const updateQuote = async (id: string, quoteData: QuoteFormData) => {
+        try {
+            const updatedQuote = {
+                ...quoteData,
+                updatedAt: new Date().toISOString(),
+            };
+
+            await QuotationApi.updateQuotation(id, updatedQuote);
+
+            await refreshQuotes();
+        } catch (err) {
+            console.error('Error updating quote:', err);
+            setError('Failed to update quote.');
+            throw err;
+        }
+    };
+
+    const updateQuoteStatus = async (id: string, status: QuoteStatus) => {
+        try {
+            await QuotationApi.changeQuotationStatus(id, status);
+
+            await refreshQuotes();
+        } catch (err) {
+            console.error('Error updating quote:', err);
+            setError('Failed to update quote.');
+            throw err;
+        }
+    };
+
+    const deleteQuote = async (id: string) => {
+        try {
+            await QuotationApi.deleteQuotation(id);
+
+            await refreshQuotes();
+        } catch (err) {
+            console.error('Error deleting quote:', err);
+            setError('Failed to delete quote.');
+            throw err;
+        }
     };
 
     return (
         <QuoteContext.Provider
-            value={{ quotes, getQuoteById, addQuote, updateQuote, deleteQuote }}
+            value={{
+                quotes,
+                loading,
+                error,
+                getQuoteById,
+                addQuote,
+                updateQuote,
+                updateQuoteStatus,
+                deleteQuote,
+                refreshQuotes,
+            }}
         >
             {children}
         </QuoteContext.Provider>

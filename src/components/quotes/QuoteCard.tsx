@@ -46,7 +46,7 @@ const QuoteCard: React.FC<QuoteCardProps> = ({ quote }) => {
                         </svg>
                     ),
                 };
-            case 'ACCEPTED':
+            case 'APPROVED':
                 return {
                     bg: 'bg-green-50',
                     border: 'border-green-200',

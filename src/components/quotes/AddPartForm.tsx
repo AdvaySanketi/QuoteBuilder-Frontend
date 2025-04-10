@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { QuotePart, PriceQuantity } from '../../models/types';
 import { Card } from '../ui/Card';
 import Button from '../ui/Button';
@@ -84,7 +83,6 @@ const AddPartForm: React.FC<AddPartFormProps> = ({
         setIsSubmitting(true);
 
         const newPart: QuotePart = {
-            id: uuidv4(),
             partName,
             moq: parseInt(moq),
             priceQuantities: priceQuantities.sort(
