@@ -8,7 +8,7 @@ import Input from '../ui/Input';
 import Dropdown from '../ui/Dropdown';
 import QuoteParts from './QuoteParts';
 import AddPartForm from './AddPartForm';
-import { generatePDF } from '../../services/pdfService';
+import { generatePDFLegacy } from '../../services/pdfService';
 import { isDateInFuture } from '../../utils/helpers';
 
 const QuoteDetail: React.FC = () => {
@@ -90,7 +90,7 @@ const QuoteDetail: React.FC = () => {
             const quote = await getQuoteById(id);
             if (quote) {
                 try {
-                    await generatePDF(quote);
+                    await generatePDFLegacy(quote);
                 } catch (error) {
                     console.error('Error generating PDF:', error);
                     alert('Could not generate PDF. Check console for details.');

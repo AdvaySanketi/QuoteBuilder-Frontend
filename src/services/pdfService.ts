@@ -2,8 +2,9 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Quote } from '../models/types';
 import { isDateInFuture } from '../utils/helpers';
+import { QuotationApi } from './apiHelper';
 
-export const generatePDF = async (quote: Quote): Promise<void> => {
+export const generatePDFLegacy = async (quote: Quote): Promise<void> => {
     const doc = new jsPDF();
     const currencySymbol = quote.currency === 'INR' ? '₹' : '$';
 
@@ -108,4 +109,16 @@ export const generatePDF = async (quote: Quote): Promise<void> => {
     doc.text('Authorized Signatory', 150, finalY + 40);
 
     doc.save(`Quotation_${quote.id}_${quote.clientName}.pdf`);
+};
+
+export const GeneratePDF = async (quote: Quote): Promise<void> => {
+    const pdfResponse = await QuotationApi.generatePDF(quote);
+    const url = window.URL.createObjectURL(pdfResponse);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Quotation_${quote.id}_${quote.clientName}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
 };

@@ -98,6 +98,17 @@ export const QuotationApi = {
             throw handleApiError(error);
         }
     },
+
+    generatePDF: async (quotationData: QuotationInput) => {
+        try {
+            const response = await api.post('/quotations/pdf', quotationData, {
+                responseType: 'blob',
+            });
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
 };
 
 function handleApiError(error: any): Error {
