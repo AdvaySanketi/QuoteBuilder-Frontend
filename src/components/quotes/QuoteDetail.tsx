@@ -37,6 +37,7 @@ const QuoteDetail: React.FC = () => {
     const [isAddingPart, setIsAddingPart] = useState(false);
     const [status, setStatus] = useState<QuoteStatus>('DRAFT');
     const [isSaving, setIsSaving] = useState(false);
+    const [showMobileActions, setShowMobileActions] = useState(false);
 
     useEffect(() => {
         const fetchQuote = async () => {
@@ -82,7 +83,10 @@ const QuoteDetail: React.FC = () => {
     };
 
     const handleDelete = async () => {
-        await deleteQuote(formData._id);
+        if (window.confirm('Are you sure you want to delete this quote?')) {
+            await deleteQuote(formData._id);
+            navigate('/');
+        }
     };
 
     const handleDownloadPDF = async () => {
@@ -138,13 +142,14 @@ const QuoteDetail: React.FC = () => {
     };
 
     return (
-        <div className='mx-auto max-w-7xl'>
+        <div className='mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8'>
             <div className='mb-6 rounded-lg border border-gray-100 bg-white p-4 shadow-sm'>
-                <div className='flex items-center justify-between'>
+                <div className='flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
                     <div className='flex items-center'>
                         <button
                             onClick={() => navigate('/')}
-                            className='mr-4 rounded-full p-2 transition-colors hover:bg-gray-100'
+                            className='mr-3 rounded-full p-2 transition-colors hover:bg-gray-100'
+                            aria-label='Back to quotes'
                         >
                             <svg
                                 xmlns='http://www.w3.org/2000/svg'
@@ -159,8 +164,8 @@ const QuoteDetail: React.FC = () => {
                                 />
                             </svg>
                         </button>
-                        <div>
-                            <h1 className='text-2xl font-bold text-gray-900'>
+                        <div className='max-w-full overflow-hidden'>
+                            <h1 className='truncate text-xl font-bold text-gray-900 sm:text-2xl'>
                                 {isNewQuote
                                     ? 'Create New Quote'
                                     : `Quote ${
@@ -170,13 +175,13 @@ const QuoteDetail: React.FC = () => {
                                       }`}
                             </h1>
                             {!isNewQuote && (
-                                <div className='mt-1 flex items-center'>
+                                <div className='mt-1 flex flex-wrap items-center gap-2'>
                                     <span
-                                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor()}`}
+                                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor()}`}
                                     >
                                         {status}
                                     </span>
-                                    <span className='mx-2 text-gray-300'>
+                                    <span className='hidden text-gray-300 sm:inline-block'>
                                         •
                                     </span>
                                     <span
@@ -197,17 +202,17 @@ const QuoteDetail: React.FC = () => {
                             )}
                         </div>
                     </div>
-                    <div className='flex space-x-3'>
+                    <div className='flex space-x-2 sm:space-x-3'>
                         <Button
                             variant='outline'
                             onClick={() => navigate('/')}
-                            className='border-gray-300 text-gray-700 hover:bg-gray-50'
+                            className='flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 sm:flex-none'
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={handleSave}
-                            className='flex items-center bg-indigo-600 shadow-sm transition-colors hover:bg-indigo-700 disabled:bg-gray-400'
+                            className='flex flex-1 items-center justify-center bg-indigo-600 shadow-sm transition-colors hover:bg-indigo-700 disabled:bg-gray-400 sm:flex-none'
                             disabled={isSaving || status !== 'DRAFT'}
                         >
                             {isSaving ? (
@@ -232,7 +237,10 @@ const QuoteDetail: React.FC = () => {
                                             d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
                                         ></path>
                                     </svg>
-                                    Saving...
+                                    <span className='sm:hidden'>Saving</span>
+                                    <span className='hidden sm:inline'>
+                                        Saving...
+                                    </span>
                                 </>
                             ) : (
                                 <>
@@ -248,10 +256,56 @@ const QuoteDetail: React.FC = () => {
                                             clipRule='evenodd'
                                         />
                                     </svg>
-                                    Save Quote
+                                    <span className='sm:hidden'>Save</span>
+                                    <span className='hidden sm:inline'>
+                                        Save Quote
+                                    </span>
                                 </>
                             )}
                         </Button>
+
+                        {!isNewQuote && (
+                            <div className='relative sm:hidden'>
+                                <button
+                                    className='rounded-md bg-white p-2 text-gray-500 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50'
+                                    onClick={() =>
+                                        setShowMobileActions(!showMobileActions)
+                                    }
+                                >
+                                    <svg
+                                        xmlns='http://www.w3.org/2000/svg'
+                                        className='h-5 w-5'
+                                        viewBox='0 0 20 20'
+                                        fill='currentColor'
+                                    >
+                                        <path d='M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z' />
+                                    </svg>
+                                </button>
+
+                                {showMobileActions && (
+                                    <div className='absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5'>
+                                        <button
+                                            className='block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100'
+                                            onClick={() => {
+                                                handleDownloadPDF();
+                                                setShowMobileActions(false);
+                                            }}
+                                        >
+                                            Download as PDF
+                                        </button>
+                                        <button
+                                            className='block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100'
+                                            onClick={() => {
+                                                handleDelete();
+                                                setShowMobileActions(false);
+                                            }}
+                                        >
+                                            Delete Quote
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -259,7 +313,7 @@ const QuoteDetail: React.FC = () => {
             <div className='grid grid-cols-1 gap-6 lg:grid-cols-3'>
                 <div className='lg:col-span-2'>
                     <Card className='overflow-hidden rounded-lg border border-gray-200 shadow-sm'>
-                        <CardHeader className='border-b border-gray-200 bg-gray-50 px-6 py-4'>
+                        <CardHeader className='border-b border-gray-200 bg-gray-50 px-4 py-4 sm:px-6'>
                             <h2 className='flex items-center text-lg font-medium text-gray-900'>
                                 <svg
                                     xmlns='http://www.w3.org/2000/svg'
@@ -276,7 +330,7 @@ const QuoteDetail: React.FC = () => {
                                 Client Information
                             </h2>
                         </CardHeader>
-                        <CardBody className='space-y-4 p-6'>
+                        <CardBody className='space-y-4 p-4 sm:p-6'>
                             <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                                 <Input
                                     label='Client Name'
@@ -330,7 +384,7 @@ const QuoteDetail: React.FC = () => {
 
                     <div className='mt-6'>
                         <Card className='overflow-hidden rounded-lg border border-gray-200 shadow-sm'>
-                            <CardHeader className='flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4'>
+                            <CardHeader className='flex flex-col space-y-2 border-b border-gray-200 bg-gray-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:px-6'>
                                 <h2 className='flex items-center text-lg font-medium text-gray-900'>
                                     <svg
                                         xmlns='http://www.w3.org/2000/svg'
@@ -346,7 +400,7 @@ const QuoteDetail: React.FC = () => {
                                     variant='outline'
                                     size='sm'
                                     onClick={() => setIsAddingPart(true)}
-                                    className='flex items-center border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:bg-gray-100 disabled:text-gray-400'
+                                    className='flex w-full items-center justify-center border-indigo-200 text-indigo-600 hover:bg-indigo-50 disabled:bg-gray-100 disabled:text-gray-400 sm:w-auto'
                                     disabled={status !== 'DRAFT'}
                                 >
                                     <svg
@@ -366,7 +420,7 @@ const QuoteDetail: React.FC = () => {
                             </CardHeader>
                             <CardBody className='p-0'>
                                 {isAddingPart ? (
-                                    <div className='p-6'>
+                                    <div className='p-4 sm:p-6'>
                                         <AddPartForm
                                             onAdd={(newPart) => {
                                                 setFormData((prev) => ({
@@ -385,21 +439,24 @@ const QuoteDetail: React.FC = () => {
                                         />
                                     </div>
                                 ) : (
-                                    <QuoteParts
-                                        parts={formData.parts}
-                                        currency={formData.currency}
-                                        disabled={status !== 'DRAFT'}
-                                        onDeletePart={(name) => {
-                                            if (status !== 'DRAFT') return;
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                parts: prev.parts.filter(
-                                                    (part) =>
-                                                        part.partName !== name
-                                                ),
-                                            }));
-                                        }}
-                                    />
+                                    <div className='overflow-x-auto'>
+                                        <QuoteParts
+                                            parts={formData.parts}
+                                            currency={formData.currency}
+                                            disabled={status !== 'DRAFT'}
+                                            onDeletePart={(name) => {
+                                                if (status !== 'DRAFT') return;
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    parts: prev.parts.filter(
+                                                        (part) =>
+                                                            part.partName !==
+                                                            name
+                                                    ),
+                                                }));
+                                            }}
+                                        />
+                                    </div>
                                 )}
                             </CardBody>
                         </Card>

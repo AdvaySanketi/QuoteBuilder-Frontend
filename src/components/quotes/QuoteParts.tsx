@@ -27,8 +27,22 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [convertedParts, setConvertedParts] = useState<QuotePart[]>(parts);
+    const [showMobileView, setShowMobileView] = useState(
+        window.innerWidth < 768
+    );
 
     const exchangeRateApiUrl = import.meta.env.VITE_EXCHANGE_RATE_API_URL;
+
+    useEffect(() => {
+        const handleResize = () => {
+            setShowMobileView(window.innerWidth < 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchConversionRate = async () => {
@@ -83,11 +97,11 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
 
     if (parts.length === 0) {
         return (
-            <div className='flex flex-col items-center justify-center px-4 py-12 text-center'>
+            <div className='flex flex-col items-center justify-center px-4 py-8 text-center sm:py-12'>
                 <div className='mb-4 rounded-full bg-gray-100 p-3'>
                     <svg
                         xmlns='http://www.w3.org/2000/svg'
-                        className='h-8 w-8 text-gray-500'
+                        className='h-6 w-6 text-gray-500 sm:h-8 sm:w-8'
                         fill='none'
                         viewBox='0 0 24 24'
                         stroke='currentColor'
@@ -124,8 +138,8 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
 
     const currencySymbol = currency === 'INR' ? '₹' : '$';
 
-    return (
-        <div className='overflow-x-auto'>
+    const StatusNotifications = () => (
+        <>
             {isLoading && (
                 <div className='mb-4 rounded-md bg-blue-50 p-2 text-sm text-blue-700'>
                     <div className='flex items-center'>
@@ -194,19 +208,23 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                     </div>
                 </div>
             )}
+        </>
+    );
 
+    const DesktopTableView = () => (
+        <div className='overflow-x-auto pb-2'>
             <table className='min-w-full divide-y divide-gray-200'>
                 <thead>
                     <tr className='bg-gray-50'>
                         <th
                             scope='col'
-                            className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'
+                            className='px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6'
                         >
                             Part Name
                         </th>
                         <th
                             scope='col'
-                            className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'
+                            className='px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6'
                         >
                             MOQ
                         </th>
@@ -214,7 +232,7 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                             <th
                                 key={qty}
                                 scope='col'
-                                className='px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500'
+                                className='px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6'
                             >
                                 <div className='flex flex-col items-center'>
                                     <span className='mb-1 text-sm font-semibold text-indigo-600'>
@@ -228,7 +246,7 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                         ))}
                         <th
                             scope='col'
-                            className='px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500'
+                            className='px-3 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6'
                         >
                             Actions
                         </th>
@@ -242,21 +260,21 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                                 partIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                             }
                         >
-                            <td className='whitespace-nowrap px-6 py-4'>
+                            <td className='whitespace-nowrap px-3 py-4 sm:px-6'>
                                 <div className='flex items-center'>
                                     <div className='flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100'>
                                         <span className='text-sm font-medium text-indigo-600'>
                                             {partIndex + 1}
                                         </span>
                                     </div>
-                                    <div className='ml-3'>
-                                        <div className='text-sm font-medium text-gray-900'>
+                                    <div className='ml-3 max-w-[100px] overflow-hidden sm:max-w-full'>
+                                        <div className='truncate text-sm font-medium text-gray-900'>
                                             {part.partName}
                                         </div>
                                     </div>
                                 </div>
                             </td>
-                            <td className='whitespace-nowrap px-6 py-4'>
+                            <td className='whitespace-nowrap px-3 py-4 sm:px-6'>
                                 <span className='inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800'>
                                     {part.moq} units
                                 </span>
@@ -268,7 +286,7 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                                 return (
                                     <td
                                         key={`${part.partName}-${qty}`}
-                                        className='whitespace-nowrap px-6 py-4 text-center text-sm'
+                                        className='whitespace-nowrap px-3 py-4 text-center text-sm sm:px-6'
                                     >
                                         {priceObj ? (
                                             <span className='font-medium text-gray-900'>
@@ -283,7 +301,7 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                                     </td>
                                 );
                             })}
-                            <td className='whitespace-nowrap px-6 py-4 text-right text-sm font-medium'>
+                            <td className='whitespace-nowrap px-3 py-4 text-right text-sm font-medium sm:px-6'>
                                 <Button
                                     onClick={() => onDeletePart(part.partName)}
                                     variant='danger'
@@ -303,19 +321,117 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                                             clipRule='evenodd'
                                         />
                                     </svg>
-                                    Remove
+                                    <span className='hidden sm:inline'>
+                                        Remove
+                                    </span>
                                 </Button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+        </div>
+    );
 
-            <div className='mt-6 rounded-lg border border-indigo-100 bg-indigo-50 p-4'>
-                <div className='flex items-center'>
+    const MobileCardView = () => (
+        <div className='space-y-4 px-4'>
+            {convertedParts.map((part, partIndex) => (
+                <div
+                    key={part.partName}
+                    className='overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm'
+                >
+                    <div className='flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3'>
+                        <div className='flex items-center'>
+                            <div className='flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100'>
+                                <span className='text-sm font-medium text-indigo-600'>
+                                    {partIndex + 1}
+                                </span>
+                            </div>
+                            <div className='ml-3'>
+                                <div className='text-sm font-medium text-gray-900'>
+                                    {part.partName}
+                                </div>
+                            </div>
+                        </div>
+                        <div className='flex items-center'>
+                            <span className='mr-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800'>
+                                MOQ: {part.moq}
+                            </span>
+                            {!disabled && (
+                                <button
+                                    onClick={() => onDeletePart(part.partName)}
+                                    className='text-red-500 hover:text-red-700'
+                                    disabled={disabled}
+                                    aria-label='Remove part'
+                                >
+                                    <svg
+                                        xmlns='http://www.w3.org/2000/svg'
+                                        className='h-5 w-5'
+                                        viewBox='0 0 20 20'
+                                        fill='currentColor'
+                                    >
+                                        <path
+                                            fillRule='evenodd'
+                                            d='M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z'
+                                            clipRule='evenodd'
+                                        />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <div className='divide-y divide-gray-200'>
+                        {part.priceQuantities.map((pq) => (
+                            <div
+                                key={`${part.partName}-${pq.quantity}`}
+                                className='flex items-center justify-between px-4 py-3'
+                            >
+                                <div className='flex flex-col'>
+                                    <span className='text-sm font-medium text-gray-900'>
+                                        {pq.quantity} units
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className='font-medium text-gray-900'>
+                                        {currencySymbol} {pq.price.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
+    return (
+        <div>
+            <StatusNotifications />
+
+            <div className='mb-4 px-4 md:hidden'>
+                <button
+                    onClick={() => setShowMobileView(!showMobileView)}
+                    className='w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50'
+                >
+                    {showMobileView
+                        ? 'Switch to Table View'
+                        : 'Switch to Card View'}
+                </button>
+            </div>
+
+            <div className='hidden md:block'>
+                <DesktopTableView />
+            </div>
+
+            <div className='md:hidden'>
+                {showMobileView ? <MobileCardView /> : <DesktopTableView />}
+            </div>
+
+            <div className='mx-4 mt-6 rounded-lg border border-indigo-100 bg-indigo-50 p-4 sm:mx-0'>
+                <div className='flex items-start sm:items-center'>
                     <svg
                         xmlns='http://www.w3.org/2000/svg'
-                        className='mr-2 h-5 w-5 text-indigo-500'
+                        className='mr-2 h-5 w-5 flex-shrink-0 text-indigo-500'
                         viewBox='0 0 20 20'
                         fill='currentColor'
                     >
@@ -327,7 +443,8 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
                     </svg>
                     <p className='text-sm text-indigo-800'>
                         <span className='font-medium'>Pricing tiers:</span> Each
-                        column represents a different quantity tier with its
+                        {showMobileView ? ' row ' : ' column '}
+                        represents a different quantity tier with its
                         corresponding price. Add multiple pricing tiers to offer
                         volume discounts.
                     </p>

@@ -9,17 +9,19 @@ const QuoteList: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <div className='mx-auto max-w-7xl'>
-            <div className='mb-8 flex items-center justify-between'>
+        <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+            <div className='mb-6 flex flex-col justify-between gap-4 sm:mb-8 sm:flex-row sm:items-center sm:gap-0'>
                 <div>
-                    <h1 className='text-3xl font-bold text-gray-900'>Quotes</h1>
-                    <p className='mt-1 text-gray-500'>
+                    <h1 className='text-2xl font-bold text-gray-900 sm:text-3xl'>
+                        Quotes
+                    </h1>
+                    <p className='mt-1 text-sm text-gray-500 sm:text-base'>
                         Manage and track all your client quotes
                     </p>
                 </div>
                 <Button
                     onClick={() => navigate('/quote/new')}
-                    className='flex items-center bg-indigo-600 shadow-md transition-colors hover:bg-indigo-700'
+                    className='flex items-center justify-center bg-indigo-600 px-3 py-2 shadow-md transition-colors hover:bg-indigo-700 sm:px-4 sm:py-2'
                 >
                     <svg
                         xmlns='http://www.w3.org/2000/svg'
@@ -38,11 +40,11 @@ const QuoteList: React.FC = () => {
             </div>
 
             {quotes.length === 0 ? (
-                <div className='my-10 rounded-lg border border-gray-100 bg-white p-12 text-center shadow-md'>
-                    <div className='mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-indigo-50'>
+                <div className='my-6 rounded-lg border border-gray-100 bg-white p-6 text-center shadow-md sm:my-10 sm:p-12'>
+                    <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 sm:mb-6 sm:h-24 sm:w-24'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
-                            className='h-12 w-12 text-indigo-500'
+                            className='h-8 w-8 text-indigo-500 sm:h-12 sm:w-12'
                             fill='none'
                             viewBox='0 0 24 24'
                             stroke='currentColor'
@@ -55,28 +57,28 @@ const QuoteList: React.FC = () => {
                             />
                         </svg>
                     </div>
-                    <h2 className='mb-2 text-xl font-semibold text-gray-800'>
+                    <h2 className='mb-2 text-lg font-semibold text-gray-800 sm:text-xl'>
                         No Quotes yet
                     </h2>
-                    <p className='mx-auto mb-6 max-w-md text-gray-500'>
+                    <p className='mx-auto mb-4 max-w-md text-sm text-gray-500 sm:mb-6 sm:text-base'>
                         Create your first quote to start tracking client
                         proposals and manage your business more effectively.
                     </p>
                     <Button
                         onClick={() => navigate('/quote/new')}
-                        className='bg-indigo-600 shadow-md transition-colors hover:bg-indigo-700'
+                        className='bg-indigo-600 px-4 py-2 shadow-md transition-colors hover:bg-indigo-700 sm:px-6 sm:py-2'
                     >
                         Create Your First Quote
                     </Button>
                 </div>
             ) : (
                 <>
-                    <div className='mb-6 rounded-lg border border-indigo-100 bg-gradient-to-r from-indigo-50 to-blue-50 p-4 shadow-sm'>
-                        <div className='flex items-center space-x-3'>
-                            <div className='rounded-full bg-indigo-100 p-2'>
+                    <div className='mb-4 rounded-lg border border-indigo-100 bg-gradient-to-r from-indigo-50 to-blue-50 p-3 shadow-sm sm:mb-6 sm:p-4'>
+                        <div className='flex items-start space-x-2 sm:items-center sm:space-x-3'>
+                            <div className='rounded-full bg-indigo-100 p-1.5 sm:p-2'>
                                 <svg
                                     xmlns='http://www.w3.org/2000/svg'
-                                    className='h-5 w-5 text-indigo-600'
+                                    className='h-4 w-4 text-indigo-600 sm:h-5 sm:w-5'
                                     viewBox='0 0 20 20'
                                     fill='currentColor'
                                 >
@@ -87,7 +89,7 @@ const QuoteList: React.FC = () => {
                                     />
                                 </svg>
                             </div>
-                            <p className='text-sm font-medium text-indigo-700'>
+                            <p className='text-xs font-medium text-indigo-700 sm:text-sm'>
                                 You have{' '}
                                 <span className='font-bold'>
                                     {quotes.length}
@@ -98,7 +100,7 @@ const QuoteList: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+                    <div className='grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3'>
                         {quotes.map((quote) => (
                             <QuoteCard key={quote._id} quote={quote} />
                         ))}

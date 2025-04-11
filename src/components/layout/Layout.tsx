@@ -13,7 +13,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Header />
             </div>
 
-            <div className='mb-[10vh] flex-grow overflow-auto'>
+            <div className='mb-[14vh] flex-grow overflow-auto md:mb-[10vh]'>
                 <main className='min-h-full px-4 py-6 sm:px-6 lg:px-8'>
                     {children}
                 </main>
