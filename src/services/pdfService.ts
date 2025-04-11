@@ -1,9 +1,23 @@
+/**
+ * pdfService.ts
+ *
+ * Service for generating PDF versions of quotes.
+ * Provides both client-side and server-side PDF generation options.
+ */
+
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Quote } from '../models/types';
 import { isDateInFuture } from '../utils/helpers';
 import { QuotationApi } from './apiHelper';
 
+/**
+ * Generates a PDF for a quote using client-side jsPDF library.
+ * Creates tables for the quote parts and includes terms and conditions.
+ *
+ * @param quote - The quote to generate a PDF for
+ * @returns Promise that resolves when the PDF has been generated and downloaded
+ */
 export const generatePDFLegacy = async (quote: Quote): Promise<void> => {
     const doc = new jsPDF();
     const currencySymbol = quote.currency === 'INR' ? '₹' : '$';
@@ -111,6 +125,13 @@ export const generatePDFLegacy = async (quote: Quote): Promise<void> => {
     doc.save(`Quotation_${quote.id}_${quote.clientName}.pdf`);
 };
 
+/**
+ * Generates a PDF for a quote using Google Drive and Docs API.
+ * Creates tables for the quote parts and includes terms and conditions.
+ *
+ * @param quote - The quote to generate a PDF for
+ * @returns Promise that resolves when the PDF has been generated and downloaded
+ */
 export const GeneratePDF = async (quote: Quote): Promise<void> => {
     const pdfResponse = await QuotationApi.generatePDF(quote);
     const url = window.URL.createObjectURL(pdfResponse);

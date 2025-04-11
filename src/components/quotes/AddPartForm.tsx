@@ -1,20 +1,40 @@
+/**
+ * AddPartForm.tsx
+ *
+ * Form component for adding new parts to a quote.
+ * Manages form state, validation, and submission.
+ */
+
 import React, { useState } from 'react';
 import { QuotePart, PriceQuantity } from '../../models/types';
 import { Card } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 
+/**
+ * Props for the AddPartForm component
+ */
 interface AddPartFormProps {
+    /** Callback function when a part is successfully added */
     onAdd: (part: QuotePart) => void;
+
+    /** Callback function when adding is cancelled */
     onCancel: () => void;
+
+    /** Currency to use for the part prices */
     currency: 'INR' | 'USD';
 }
 
+/**
+ * AddPartForm component provides a form for adding new quote parts.
+ * Manages price-quantity pairs, validation, and form submission.
+ */
 const AddPartForm: React.FC<AddPartFormProps> = ({
     onAdd,
     onCancel,
     currency,
 }) => {
+    // Form state
     const [partName, setPartName] = useState('');
     const [moq, setMoq] = useState('');
     const [priceQuantities, setPriceQuantities] = useState<PriceQuantity[]>([
@@ -23,10 +43,17 @@ const AddPartForm: React.FC<AddPartFormProps> = ({
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    /**
+     * Adds a new price-quantity pair to the form
+     */
     const handleAddPriceQuantity = () => {
         setPriceQuantities([...priceQuantities, { quantity: 0, price: 0 }]);
     };
 
+    /**
+     * Removes a price-quantity pair at the specified index
+     * @param index - The index of the price-quantity pair to remove
+     */
     const handleRemovePriceQuantity = (index: number) => {
         setPriceQuantities(priceQuantities.filter((_, i) => i !== index));
     };

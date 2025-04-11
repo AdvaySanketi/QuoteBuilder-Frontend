@@ -8,18 +8,16 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
-        <div className='flex h-screen flex-col'>
+        <div className='flex min-h-screen flex-col'>
             <div className='flex-shrink-0'>
                 <Header />
             </div>
 
-            <div className='mb-[14vh] flex-grow overflow-auto md:mb-[10vh]'>
-                <main className='min-h-full px-4 py-6 sm:px-6 lg:px-8'>
-                    {children}
-                </main>
+            <div className='flex-grow pb-28'>
+                <main className='px-4 py-6 sm:px-6 lg:px-8'>{children}</main>
             </div>
 
-            <div className='flex-shrink-0'>
+            <div className='fixed bottom-0 left-0 right-0 h-16 bg-white shadow'>
                 <Footer />
             </div>
         </div>

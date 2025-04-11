@@ -1,3 +1,10 @@
+/**
+ * QuoteDetail.tsx
+ *
+ * Component for creating and editing individual quotes.
+ * Handles form state, validation, and submission.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuoteContext } from '../../contexts/QuoteContext';
@@ -11,8 +18,16 @@ import AddPartForm from './AddPartForm';
 import { generatePDFLegacy } from '../../services/pdfService';
 import { isDateInFuture } from '../../utils/helpers';
 
+/**
+ * QuoteDetail component manages the creation and editing of quotes.
+ * Handles form state, validation, and submission to the API.
+ * Provides different functionality based on whether it's a new quote or editing an existing one.
+ */
 const QuoteDetail: React.FC = () => {
+    // Get ID from URL parameters
     const { id } = useParams<{ id: string }>();
+
+    // Access quote context for CRUD operations
     const {
         getQuoteById,
         addQuote,
@@ -23,6 +38,9 @@ const QuoteDetail: React.FC = () => {
     const navigate = useNavigate();
     const isNewQuote = id === 'new';
 
+    /**
+     * Initial form state with default values for a new quote
+     */
     const [formData, setFormData] = useState<QuoteFormData>({
         _id: '',
         clientName: '',

@@ -1,10 +1,22 @@
+/**
+ * QuoteList.tsx
+ *
+ * Component for displaying a list of all quotes in the system.
+ * Provides navigation to create new quotes or view existing ones.
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuoteContext } from '../../contexts/QuoteContext';
 import QuoteCard from './QuoteCard';
 import Button from '../ui/Button';
 
+/**
+ * QuoteList component displays all quotes in a responsive grid layout.
+ * Shows empty state when no quotes exist and provides action to create new quotes.
+ */
 const QuoteList: React.FC = () => {
+    // Get quotes from context and navigation hooks
     const { quotes } = useQuoteContext();
     const navigate = useNavigate();
 

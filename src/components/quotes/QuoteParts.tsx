@@ -1,14 +1,34 @@
+/**
+ * QuoteParts.tsx
+ *
+ * Component for displaying and managing quote parts with pricing tiers.
+ * Handles currency conversion and responsive layouts.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { QuotePart } from '../../models/types';
 import Button from '../ui/Button';
 
+/**
+ * Props for the QuoteParts component
+ */
 interface QuotePartsProps {
+    /** Array of parts to display */
     parts: QuotePart[];
+
+    /** Currency to display prices in */
     currency: 'INR' | 'USD';
+
+    /** Callback for when a part is deleted */
     onDeletePart: (id: string) => void;
+
+    /** Whether the component is in disabled state */
     disabled: boolean;
 }
 
+/**
+ * Response structure from currency conversion API
+ */
 interface ConversionResponse {
     result: string;
     base_code: string;
@@ -17,16 +37,24 @@ interface ConversionResponse {
     conversion_result: number;
 }
 
+/**
+ * QuoteParts component displays a table or card view of quote parts with pricing tiers.
+ * Supports currency conversion between INR and USD.
+ * Adapts to mobile and desktop layouts.
+ */
 const QuoteParts: React.FC<QuotePartsProps> = ({
     parts,
     currency,
     onDeletePart,
     disabled,
 }) => {
+    // State for currency conversion
     const [conversionRate, setConversionRate] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [convertedParts, setConvertedParts] = useState<QuotePart[]>(parts);
+
+    // Responsive state
     const [showMobileView, setShowMobileView] = useState(
         window.innerWidth < 768
     );

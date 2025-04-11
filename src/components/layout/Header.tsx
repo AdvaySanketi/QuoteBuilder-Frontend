@@ -178,16 +178,16 @@ const Header: React.FC = () => {
                         <div className='flex-shrink-0'>
                             <div className='flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100'>
                                 <span className='font-medium text-indigo-800'>
-                                    JD
+                                    AS
                                 </span>
                             </div>
                         </div>
                         <div className='ml-3'>
                             <div className='text-base font-medium text-gray-800'>
-                                John Doe
+                                Advay Sanketi
                             </div>
                             <div className='text-sm font-medium text-gray-500'>
-                                john@example.com
+                                advay2807@gmail.com
                             </div>
                         </div>
                         <button

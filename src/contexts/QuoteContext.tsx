@@ -1,16 +1,65 @@
+/**
+ * QuoteContext.tsx
+ *
+ * Context provider for managing quote data throughout the application.
+ * Handles API communication, state management, and CRUD operations.
+ */
+
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { Quote, QuoteFormData, QuoteStatus } from '../models/types';
 import { QuotationApi } from '../services/apiHelper';
 
+/**
+ * Interface defining the shape of the Quote context.
+ * Provides methods and state for interacting with quotes.
+ */
 interface QuoteContextType {
+    /** List of all quotes retrieved from the API */
     quotes: Quote[];
+
+    /** Indicates whether quotes are currently being loaded */
     loading: boolean;
+
+    /** Error message if quote operations fail */
     error: string | null;
+
+    /**
+     * Retrieves a specific quote by its ID
+     * @param id - The unique identifier of the quote
+     * @returns Promise resolving to the quote or undefined if not found
+     */
     getQuoteById: (id: string) => Promise<Quote | undefined>;
+
+    /**
+     * Creates a new quote with the provided data
+     * @param quote - The quote data to use for creation
+     * @returns Promise resolving to the ID of the newly created quote
+     */
     addQuote: (quote: QuoteFormData) => Promise<string>;
+
+    /**
+     * Updates an existing quote with new data
+     * @param id - The ID of the quote to update
+     * @param quote - The updated quote data
+     */
     updateQuote: (id: string, quote: QuoteFormData) => Promise<void>;
-    updateQuoteStatus: (id: string, quote: QuoteStatus) => Promise<void>;
+
+    /**
+     * Updates only the status of a quote
+     * @param id - The ID of the quote to update
+     * @param status - The new status to apply
+     */
+    updateQuoteStatus: (id: string, status: QuoteStatus) => Promise<void>;
+
+    /**
+     * Permanently removes a quote
+     * @param id - The ID of the quote to delete
+     */
     deleteQuote: (id: string) => Promise<void>;
+
+    /**
+     * Refreshes the quote list from the API
+     */
     refreshQuotes: () => Promise<void>;
 }
 

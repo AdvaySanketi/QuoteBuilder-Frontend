@@ -1,15 +1,35 @@
+/**
+ * QuoteCard.tsx
+ *
+ * Card component for displaying a quote in the quote list.
+ * Shows status, expiration, and key information about a quote.
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Quote } from '../../models/types';
 import { isDateInFuture } from '../../utils/helpers';
 
+/**
+ * Props for the QuoteCard component
+ */
 interface QuoteCardProps {
+    /** The quote to display */
     quote: Quote;
 }
 
+/**
+ * QuoteCard displays a summary of a quote in a card format.
+ * Shows status, client name, validity, and provides navigation to the detail view.
+ */
 const QuoteCard: React.FC<QuoteCardProps> = ({ quote }) => {
     const navigate = useNavigate();
 
+    /**
+     * Gets the visual styling for different quote statuses
+     * @param status - The status of the quote
+     * @returns An object with CSS classes for styling the status display
+     */
     const getStatusInfo = (status: string) => {
         switch (status) {
             case 'DRAFT':
