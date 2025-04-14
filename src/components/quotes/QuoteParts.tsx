@@ -63,11 +63,17 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
 
     useEffect(() => {
         const fetchConvrate = async () => {
-            const res = await getConvRate();
-            if (res) {
-                setConversionRate(res.rate);
-            } else {
-                setConversionRate(0.012);
+            setIsLoading(true);
+            try {
+                const res = await getConvRate();
+                if (res) {
+                    setConversionRate(res.rate);
+                } else {
+                    setConversionRate(0.012);
+                }
+                setIsLoading(false);
+            } catch {
+                setError('Failed to fetch Conversion Rate');
             }
         };
 

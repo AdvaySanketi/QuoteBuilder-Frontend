@@ -217,7 +217,13 @@ const QuoteList: React.FC = () => {
 
                     <div className='h-[calc(100vh-350px)] min-h-[400px]'>
                         <AutoSizer>
-                            {({ height, width }) => {
+                            {({
+                                height,
+                                width,
+                            }: {
+                                height: number;
+                                width: number;
+                            }) => {
                                 width = width + 18;
                                 const columnCount = getColumnCount(width);
                                 const rowCount = Math.ceil(
