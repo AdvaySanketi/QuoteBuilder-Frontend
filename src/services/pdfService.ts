@@ -10,6 +10,7 @@ import autoTable from 'jspdf-autotable';
 import { Quote } from '../models/types';
 import { isDateInFuture } from '../utils/helpers';
 import { QuotationApi } from './apiHelper';
+import Poppins from '../../public/fonts/Poppins/Poppins-Regular.ttf';
 
 /**
  * Generates a PDF for a quote using client-side jsPDF library.
@@ -22,6 +23,8 @@ export const generatePDFLegacy = async (quote: Quote): Promise<void> => {
     const doc = new jsPDF();
     const currencySymbol = quote.currency === 'INR' ? '₹' : '$';
 
+    doc.addFont(Poppins, 'Poppins', 'normal');
+    doc.setFont('Poppins');
     doc.setFontSize(20);
     doc.text('Quotation', 105, 15, { align: 'center' });
 
@@ -87,11 +90,12 @@ export const generatePDFLegacy = async (quote: Quote): Promise<void> => {
         body: rows,
         startY: 65,
         theme: 'grid',
-        styles: { fontSize: 8 },
+        styles: { fontSize: 8, font: 'Poppins' },
         headStyles: {
             fillColor: [41, 128, 185],
             textColor: 255,
             fontStyle: 'bold',
+            font: 'Poppins',
         },
         alternateRowStyles: {
             fillColor: [240, 240, 240],

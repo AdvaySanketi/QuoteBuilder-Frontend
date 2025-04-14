@@ -185,6 +185,15 @@ export const QuotationApi = {
             throw handleApiError(error);
         }
     },
+
+    getConvRate: async () => {
+        try {
+            const response = await api.get('/convrate');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
 };
 
 /**

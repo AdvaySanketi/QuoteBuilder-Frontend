@@ -37,3 +37,9 @@ export interface QuoteFormData {
     status: QuoteStatus;
     parts: QuotePart[];
 }
+
+export interface ConvRate {
+    rate: number;
+    lastUpdated: string;
+    isFallback: boolean;
+}

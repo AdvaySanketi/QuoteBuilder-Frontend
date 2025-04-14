@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useQuoteContext } from '../../contexts/QuoteContext';
 import { QuotePart } from '../../models/types';
 import Button from '../ui/Button';
 
@@ -27,17 +28,6 @@ interface QuotePartsProps {
 }
 
 /**
- * Response structure from currency conversion API
- */
-interface ConversionResponse {
-    result: string;
-    base_code: string;
-    target_code: string;
-    conversion_rate: number;
-    conversion_result: number;
-}
-
-/**
  * QuoteParts component displays a table or card view of quote parts with pricing tiers.
  * Supports currency conversion between INR and USD.
  * Adapts to mobile and desktop layouts.
@@ -53,13 +43,12 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [convertedParts, setConvertedParts] = useState<QuotePart[]>(parts);
+    const { getConvRate } = useQuoteContext();
 
     // Responsive state
     const [showMobileView, setShowMobileView] = useState(
         window.innerWidth < 768
     );
-
-    const exchangeRateApiUrl = import.meta.env.VITE_EXCHANGE_RATE_API_URL;
 
     useEffect(() => {
         const handleResize = () => {
@@ -73,39 +62,17 @@ const QuoteParts: React.FC<QuotePartsProps> = ({
     }, []);
 
     useEffect(() => {
-        const fetchConversionRate = async () => {
-            if (currency !== 'INR') {
-                setIsLoading(true);
-                setError(null);
-
-                try {
-                    const response = await fetch(`${exchangeRateApiUrl}/1`);
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch conversion rate');
-                    }
-
-                    const data: ConversionResponse = await response.json();
-
-                    if (data.result === 'success') {
-                        setConversionRate(data.conversion_rate);
-                    } else {
-                        throw new Error('API returned unsuccessful result');
-                    }
-                } catch (err) {
-                    console.error('Error fetching conversion rate:', err);
-                    setError('Could not load currency conversion rates');
-                    setConversionRate(0.012); // fallback
-                } finally {
-                    setIsLoading(false);
-                }
+        const fetchConvrate = async () => {
+            const res = await getConvRate();
+            if (res) {
+                setConversionRate(res.rate);
             } else {
-                setConversionRate(null);
+                setConversionRate(0.012);
             }
         };
 
-        fetchConversionRate();
-    }, [currency, exchangeRateApiUrl]);
+        fetchConvrate();
+    }, []);
 
     useEffect(() => {
         if (currency === 'USD' && conversionRate) {

@@ -5,8 +5,15 @@
  * Handles API communication, state management, and CRUD operations.
  */
 
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { Quote, QuoteFormData, QuoteStatus } from '../models/types';
+import React, {
+    createContext,
+    useState,
+    useEffect,
+    ReactNode,
+    useCallback,
+    useMemo,
+} from 'react';
+import { Quote, QuoteFormData, QuoteStatus, ConvRate } from '../models/types';
 import { QuotationApi } from '../services/apiHelper';
 
 /**
@@ -61,6 +68,18 @@ interface QuoteContextType {
      * Refreshes the quote list from the API
      */
     refreshQuotes: () => Promise<void>;
+
+    /**
+     * Get Conversion Rate
+     */
+    getConvRate: () => Promise<ConvRate | undefined>;
+}
+
+interface QuoteProviderState {
+    quotes: Quote[];
+    idMapping: Record<string, string>;
+    loading: boolean;
+    error: string | null;
 }
 
 export const QuoteContext = createContext<QuoteContextType | undefined>(
@@ -72,140 +91,204 @@ interface QuoteProviderProps {
 }
 
 export const QuoteProvider: React.FC<QuoteProviderProps> = ({ children }) => {
-    const [quotes, setQuotes] = useState<Quote[]>([]);
-    const [idMapping, setIdMapping] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [state, setState] = useState<QuoteProviderState>({
+        quotes: [],
+        idMapping: {},
+        loading: true,
+        error: null,
+    });
 
-    const fetchQuotes = async () => {
+    const memoizedQuotes = useMemo(() => state.quotes, [state.quotes]);
+
+    const memoizedIdMapping = useMemo(() => state.idMapping, [state.idMapping]);
+
+    const fetchQuotes = useCallback(async () => {
         try {
-            setLoading(true);
+            setState((prev) => ({ ...prev, loading: true }));
             const response = await QuotationApi.getAllQuotations();
             const quotesData = Array.isArray(response)
                 ? response
                 : response.data;
 
-            const newMapping = quotesData.reduce(
-                (acc: Record<string, string>, quote: Quote) => {
-                    if (quote.id && quote._id) {
-                        acc[quote.id] = quote._id;
-                    }
-                    return acc;
-                },
-                {} as Record<string, string>
-            );
-
-            setQuotes(quotesData);
-            setIdMapping(newMapping);
-            setError(null);
+            setState((prev) => ({
+                ...prev,
+                quotes: quotesData,
+                idMapping: quotesData.reduce(
+                    (acc: Record<string, string>, quote: Quote) => {
+                        if (quote.id && quote._id) acc[quote.id] = quote._id;
+                        return acc;
+                    },
+                    {} as Record<string, string>
+                ),
+                error: null,
+                loading: false,
+            }));
         } catch (err) {
             console.error('Error fetching quotations:', err);
-            setError('Failed to load quotes. Please try again later.');
-        } finally {
-            setLoading(false);
+            setState((prev) => ({
+                ...prev,
+                error: 'Failed to load quotes. Please try again later.',
+                loading: false,
+            }));
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchQuotes();
-    }, []);
+    }, [fetchQuotes]);
 
-    const refreshQuotes = async () => {
+    const refreshQuotes = useCallback(async () => {
         await fetchQuotes();
-    };
+    }, [fetchQuotes]);
 
-    const getQuoteById = async (id: string) => {
+    const getQuoteById = useCallback(
+        async (id: string) => {
+            try {
+                const qid = memoizedIdMapping[id] || id;
+                const response = await QuotationApi.getQuotationById(qid);
+                return response.data || response;
+            } catch (err) {
+                console.error('Error fetching quote:', err);
+                setState((prev) => ({
+                    ...prev,
+                    error: 'Failed to fetch quote details.',
+                }));
+                return undefined;
+            }
+        },
+        [memoizedIdMapping]
+    );
+
+    const addQuote = useCallback(
+        async (quoteData: QuoteFormData): Promise<string> => {
+            try {
+                const now = new Date().toISOString();
+                const qid = Math.floor(Math.random() * 10000);
+                const newQuote: Quote = {
+                    ...quoteData,
+                    id: `Q-${qid}`,
+                    quoteNumber: `${qid}`,
+                    createdAt: now,
+                    updatedAt: now,
+                    parts: quoteData.parts || [],
+                };
+
+                const createdQuote = await QuotationApi.createQuotation(
+                    newQuote
+                );
+                await refreshQuotes();
+                return createdQuote.id;
+            } catch (err) {
+                console.error('Error adding quote:', err);
+                setState((prev) => ({
+                    ...prev,
+                    error: 'Failed to create quote.',
+                }));
+                throw err;
+            }
+        },
+        [refreshQuotes]
+    );
+
+    const updateQuote = useCallback(
+        async (id: string, quoteData: QuoteFormData) => {
+            try {
+                const updatedQuote = {
+                    ...quoteData,
+                    updatedAt: new Date().toISOString(),
+                };
+
+                await QuotationApi.updateQuotation(id, updatedQuote);
+                await refreshQuotes();
+            } catch (err) {
+                console.error('Error updating quote:', err);
+                setState((prev) => ({
+                    ...prev,
+                    error: 'Failed to update quote.',
+                }));
+                throw err;
+            }
+        },
+        [refreshQuotes]
+    );
+
+    const updateQuoteStatus = useCallback(
+        async (id: string, status: QuoteStatus) => {
+            try {
+                await QuotationApi.changeQuotationStatus(id, status);
+                await refreshQuotes();
+            } catch (err) {
+                console.error('Error updating quote:', err);
+                setState((prev) => ({
+                    ...prev,
+                    error: 'Failed to update quote.',
+                }));
+                throw err;
+            }
+        },
+        [refreshQuotes]
+    );
+
+    const deleteQuote = useCallback(
+        async (id: string) => {
+            try {
+                await QuotationApi.deleteQuotation(id);
+                await refreshQuotes();
+            } catch (err) {
+                console.error('Error deleting quote:', err);
+                setState((prev) => ({
+                    ...prev,
+                    error: 'Failed to delete quote.',
+                }));
+                throw err;
+            }
+        },
+        [refreshQuotes]
+    );
+
+    const getConvRate = useCallback(async () => {
         try {
-            const qid = idMapping[id] || id;
-            const response = await QuotationApi.getQuotationById(qid);
+            const response = await QuotationApi.getConvRate();
             return response.data || response;
         } catch (err) {
-            console.error('Error fetching quote:', err);
-            setError('Failed to fetch quote details.');
+            console.error('Error fetching Conversion Rate:', err);
+            setState((prev) => ({
+                ...prev,
+                error: 'Failed to fetch Conversion Rate.',
+            }));
             return undefined;
         }
-    };
+    }, []);
 
-    const addQuote = async (quoteData: QuoteFormData): Promise<string> => {
-        try {
-            const now = new Date().toISOString();
-            const qid = Math.floor(Math.random() * 10000); // could use uuidv4() also
-            const newQuote: Quote = {
-                ...quoteData,
-                id: `Q-${qid}`,
-                quoteNumber: `${qid}`,
-                createdAt: now,
-                updatedAt: now,
-                parts: quoteData.parts || [],
-            };
-
-            const createdQuote = await QuotationApi.createQuotation(newQuote);
-
-            await refreshQuotes();
-
-            return createdQuote.id;
-        } catch (err) {
-            console.error('Error adding quote:', err);
-            setError('Failed to create quote.');
-            throw err;
-        }
-    };
-
-    const updateQuote = async (id: string, quoteData: QuoteFormData) => {
-        try {
-            const updatedQuote = {
-                ...quoteData,
-                updatedAt: new Date().toISOString(),
-            };
-
-            await QuotationApi.updateQuotation(id, updatedQuote);
-
-            await refreshQuotes();
-        } catch (err) {
-            console.error('Error updating quote:', err);
-            setError('Failed to update quote.');
-            throw err;
-        }
-    };
-
-    const updateQuoteStatus = async (id: string, status: QuoteStatus) => {
-        try {
-            await QuotationApi.changeQuotationStatus(id, status);
-
-            await refreshQuotes();
-        } catch (err) {
-            console.error('Error updating quote:', err);
-            setError('Failed to update quote.');
-            throw err;
-        }
-    };
-
-    const deleteQuote = async (id: string) => {
-        try {
-            await QuotationApi.deleteQuotation(id);
-
-            await refreshQuotes();
-        } catch (err) {
-            console.error('Error deleting quote:', err);
-            setError('Failed to delete quote.');
-            throw err;
-        }
-    };
+    const contextValue = useMemo(
+        () => ({
+            quotes: memoizedQuotes,
+            loading: state.loading,
+            error: state.error,
+            getQuoteById,
+            addQuote,
+            updateQuote,
+            updateQuoteStatus,
+            deleteQuote,
+            refreshQuotes,
+            getConvRate,
+        }),
+        [
+            memoizedQuotes,
+            state.loading,
+            state.error,
+            getQuoteById,
+            addQuote,
+            updateQuote,
+            updateQuoteStatus,
+            deleteQuote,
+            refreshQuotes,
+            getConvRate,
+        ]
+    );
 
     return (
-        <QuoteContext.Provider
-            value={{
-                quotes,
-                loading,
-                error,
-                getQuoteById,
-                addQuote,
-                updateQuote,
-                updateQuoteStatus,
-                deleteQuote,
-                refreshQuotes,
-            }}
-        >
+        <QuoteContext.Provider value={contextValue}>
             {children}
         </QuoteContext.Provider>
     );
