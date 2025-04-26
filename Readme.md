@@ -1,4 +1,4 @@
-## ![alt text](content/image.png){width=30px} QuoteBuilder
+# QuoteBuilder
 
 ### Overview
 
